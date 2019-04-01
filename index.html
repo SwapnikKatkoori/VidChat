@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Video Chat Demo</title>
+</head>
+<body>
+	<h1>Video Chat Demo</h1>
+	<button id="connect_button">connect</button>
+	<div id="video_player">
+	</div>
+	<script type="text/javascript" src="videochat.js"></script>
+	<script type="text/javascript">
+		vc = new VideoChat({
+			divID: "video_player",
+			height: "400",
+			width: "400",
+			number: 1
+		})
+	</script>
+</body>
+</html>
