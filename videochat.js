@@ -1,3 +1,13 @@
+
+function handleConnection(event){
+		console.log("The handleConnectionEvent: ", event)
+	}
+
+function streamAdded(event){
+	console.log("The streamAdded event: ",event)
+}
+
+
 class VideoChat{
 	constructor(initial_obj){
 		//initial obj is an object that the client passes in.
@@ -10,13 +20,32 @@ class VideoChat{
 		//The number of potential people in the chat
 		this.number = initial_obj.number
 
-		this.peer_connection = null;
+		this.ws = new WebSocket("ws://localhost:8000");
+		this.ws.onopen = (event) =>{
+			console.log("connected to websocket on the client side");
+			this.ws.send('sendMessage',(err)=>{
+				console.log(err)
+			})
+		}
+		this.ws.onmessage = (mssg) =>{
+			this.recieve_message(mssg)
+		}
+		let config = {iceServers:[{urls:'stun:stun.l.google.com:19302'}]}
+		
+		this.peer_connection = new RTCPeerConnection(config);
+		this.peer_connection.addEventListener = ('onicecandidate', handleConnection)
+		this.peer_connection.addEventListener = ('onaddstream', streamAdded)
+		this.personal_id = Math.floor(Math.random()*1000000000);
+
+		this.send_message = this.send_message.bind(this)
 		this.initial_setup()
 	}
 
 	initial_setup(){
 		let join_button = document.getElementById("connect_button");
-		join_button.onclick = this.joinCall
+		join_button.onclick = this.send_message
+		this.getPermissionAndStream()
+		this.show_all()
 	 }
 	//Asks the user for permissiton to use camera and audio
 	async getPermissionAndStream(){
@@ -27,8 +56,7 @@ class VideoChat{
 				video:true
 			};
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
-			this.peer_connection.addStream(stream)
-			
+			this.show_my_face(stream)			
 		}
 		catch(err){
 			console.log(err);
@@ -50,31 +78,37 @@ class VideoChat{
 		}
 	}
 
-	createConnection(){
-		let config = {iceServers:[{urls:'stun:stun.l.google.com:19302'}]}
-		this.peer_connection = new RTCPeerConnection(config);
-		this.peer_connection.addEventListener = ('onicecandidate', this.handleConnection)
-		this.peer_connection.addEventListener = ('onaddstream', this.streamAdded)
-		this.getPermissionAndStream()
-	}
 
-	handleConnection(event){
-		console.log("The handleConnectionEvent: ", event)
+	show_my_face(stream){
+		let my_video = document.getElementById("my_video")
+		my_video.srcObject = stream
+		my_video.height = this.height;
+		my_video.width = this.width;
+		my_video.autoplay = true;
+		this.peer_connection.addStream(stream)
 	}
-
-	streamAdded(event){
-		console.log("The streamAdded event: ",event)
-	}
-
-	joinCall(){
-		let ws = new WebSocket("ws://localhost:8000");
-		ws.onopen = (event)=>{
-			console.log("connected to websocket on the client side");
-			ws.send('sendMessage',(err)=>{
-				console.log(err)
-			})
+	async show_all(){
+		try{
+			let offer = await this.peer_connection.createOffer();
+			await this.peer_connection.setLocalDescription(offer)
+			this.send_message()
 		}
-		
+		catch(err){
+			console.log("error in show_all(): ", err);
+		}
+
+	}
+
+	send_message(){
+		var id = this.personal_id
+		var description = this.peer_connection.localDescription
+		var json_string = JSON.stringify({user_id:id, message: description})
+		console.log(JSON.parse(json_string))
+		this.ws.send(json_string)
+	}
+
+	recieve_message(mssg){
+		console.log(mssg)
 	}
 }
 

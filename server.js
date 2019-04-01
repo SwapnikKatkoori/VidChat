@@ -12,6 +12,11 @@ wss.on('connection', function (ws) {
 	console.log("socket connected on the server side")
 	ws.on('message',(mssg)=>{
 		console.log(mssg);
+		wss.clients.forEach(function each(client) {
+      		if (client !== ws && client.readyState === WebSocket.OPEN) {
+        		client.send("hello");
+      		}
+    	});
 	});
 });
 
