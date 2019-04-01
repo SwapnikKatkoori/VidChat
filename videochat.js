@@ -11,7 +11,7 @@ class VideoChat{
 		//The number of potential people in the chat
 		this.number = initial_obj.number
 
-		this.ws = new WebSocket("ws://localhost:8000");
+		this.ws = new WebSocket("ws://swapnikkatkoori.github.io/VidChat/");
 		this.ws.onopen = (event) =>{
 			console.log("connected to websocket on the client side");
 		}
@@ -35,7 +35,6 @@ class VideoChat{
 			friends_video.height = this.height;
 			friends_video.width = this.width;
 			console.log("here")
-
 		})
 
 
@@ -54,12 +53,11 @@ class VideoChat{
 		this.getPermissionAndStream()
 		//this.show_all()
 	 }
-	//Asks the user for permissiton to use camera and audio
 	async getPermissionAndStream(){
 		let stream = null;
 		try{
 			let constraints = {
-				audio:true,
+				audio:false,
 				video:true
 			};
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
