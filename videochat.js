@@ -12,7 +12,7 @@ class VideoChat{
 		this.number = initial_obj.number
 
 		//this.ws = new WebSocket("ws://localhost:8000");
-		this.ws = new WebSocket("wss://swapnikkatkoori.github.io/VidChat/")
+		this.ws = new WebSocket("wss://pumpkin-cake-47918.herokuapp.com/")
 		this.ws.onopen = (event) =>{
 			console.log("connected to websocket on the client side");
 		}
