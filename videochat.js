@@ -11,8 +11,8 @@ class VideoChat{
 		//The number of potential people in the chat
 		this.number = initial_obj.number
 
-		this.ws = new WebSocket("ws://localhost:8000");
-		//this.ws = new WebSocket("ws://swapnikkatkoori.github.io/VidChat/")
+		//this.ws = new WebSocket("ws://localhost:8000");
+		this.ws = new WebSocket("ws://swapnikkatkoori.github.io/VidChat/")
 		this.ws.onopen = (event) =>{
 			console.log("connected to websocket on the client side");
 		}
