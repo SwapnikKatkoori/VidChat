@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+
 const server = require('http').createServer((req,res)=>{
 	res.write("Socket server started up");
 	res.end();
@@ -14,7 +15,7 @@ wss.on('connection', function (ws) {
 		console.log(mssg);
 		wss.clients.forEach(function each(client) {
       		if (client !== ws && client.readyState === WebSocket.OPEN) {
-        		client.send("hello");
+        		client.send(mssg);
       		}
     	});
 	});

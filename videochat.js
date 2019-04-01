@@ -1,13 +1,4 @@
 
-function handleConnection(event){
-		console.log("The handleConnectionEvent: ", event)
-	}
-
-function streamAdded(event){
-	console.log("The streamAdded event: ",event)
-}
-
-
 class VideoChat{
 	constructor(initial_obj){
 		//initial obj is an object that the client passes in.
@@ -23,36 +14,52 @@ class VideoChat{
 		this.ws = new WebSocket("ws://localhost:8000");
 		this.ws.onopen = (event) =>{
 			console.log("connected to websocket on the client side");
-			this.ws.send('sendMessage',(err)=>{
-				console.log(err)
-			})
 		}
 		this.ws.onmessage = (mssg) =>{
 			this.recieve_message(mssg)
 		}
-		let config = {iceServers:[{urls:'stun:stun.l.google.com:19302'}]}
+		let config = {iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.l.mozilla.com:3478'}, {urls: 'stun:stun.l.samsungsmartcam.com:3478'}]}
 		
+		//This creates a peer connection for this instance of video chat
+		//Peer connection api 
 		this.peer_connection = new RTCPeerConnection(config);
-		this.peer_connection.addEventListener = ('onicecandidate', handleConnection)
-		this.peer_connection.addEventListener = ('onaddstream', streamAdded)
+		this.peer_connection.onicecandidate = ((event)=>{
+			this.send_message(event.candidate)
+		})
+
+		this.peer_connection.onaddstream = ((event)=>{
+			console.log(event.stream)
+			let friends_video = document.getElementById("friends_video")
+			friends_video.srcObject = event.stream
+			friends_video.autoplay = true
+			friends_video.height = this.height;
+			friends_video.width = this.width;
+			console.log("here")
+
+		})
+
+
 		this.personal_id = Math.floor(Math.random()*1000000000);
 
 		this.send_message = this.send_message.bind(this)
+		this.show_all = this.show_all.bind(this)
+		this.recieve_message = this.recieve_message.bind(this)
+		// this.handleConnection = this.handleConnection.bind(this)
 		this.initial_setup()
 	}
 
 	initial_setup(){
 		let join_button = document.getElementById("connect_button");
-		join_button.onclick = this.send_message
+		join_button.onclick = this.show_all
 		this.getPermissionAndStream()
-		this.show_all()
+		//this.show_all()
 	 }
 	//Asks the user for permissiton to use camera and audio
 	async getPermissionAndStream(){
 		let stream = null;
 		try{
 			let constraints = {
-				auido:true,
+				audio:true,
 				video:true
 			};
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -62,22 +69,6 @@ class VideoChat{
 			console.log(err);
 		}
 	}
-
-	displayVideo(stream){
-		let video_player_div = document.getElementById(this.divID);
-		for (var i = this.number; i > 0; i--) {
-			let new_div = document.createElement("DIV")
-			let video_player = document.createElement("VIDEO");
-			video_player.height = this.height;
-			video_player.width = this.width;
-			video_player.autoplay = true;
-			video_player.style.transform = "scaleX(-1)";
-			video_player.srcObject = stream;
-			new_div.appendChild(video_player);
-			video_player_div.appendChild(new_div)
-		}
-	}
-
 
 	show_my_face(stream){
 		let my_video = document.getElementById("my_video")
@@ -99,16 +90,47 @@ class VideoChat{
 
 	}
 
-	send_message(){
+	send_message(ice_candidate=null){
 		var id = this.personal_id
 		var description = this.peer_connection.localDescription
-		var json_string = JSON.stringify({user_id:id, message: description})
-		console.log(JSON.parse(json_string))
+		if (ice_candidate instanceof MouseEvent){
+			ice_candidate = null
+		}
+		var json_string = JSON.stringify({user_id:id, message: [description,ice_candidate]})
 		this.ws.send(json_string)
 	}
 
-	recieve_message(mssg){
-		console.log(mssg)
+	async recieve_message(mssg){
+		let data = JSON.parse(mssg.data);
+		console.log(data)
+		let message = data.message
+		let description = message[0]
+		let description_type = description.type
+		let ice_candidate = message[1]
+		if (ice_candidate != null){
+			console.log("recieved ice candidate")
+			this.peer_connection.addIceCandidate(new RTCIceCandidate(ice_candidate))
+		}
+		else{
+			if(description_type === "offer"){
+				console.log("an offer was made:", description)
+				try{
+					await this.peer_connection.setRemoteDescription(new RTCSessionDescription(description))
+					let answer = await this.peer_connection.createAnswer()
+					await this.peer_connection.setLocalDescription(answer)
+					this.send_message()
+				}catch(err){
+					console.log(err)
+				}
+			}
+			else if(description_type === "answer"){
+				console.log("This is the answer:", description)
+				await this.peer_connection.setRemoteDescription(new RTCSessionDescription(description));	
+			}
+			
+		}
 	}
+
+	
 }
 
