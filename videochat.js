@@ -80,6 +80,7 @@ class VideoChat{
 		my_video.width = this.width;
 		my_video.autoplay = true;
 		my_video.style.transform = "scaleX(-1)";
+		my_video.muted = "muted"
 		this.peer_connection.addStream(stream)
 	}
 	async show_all(){
