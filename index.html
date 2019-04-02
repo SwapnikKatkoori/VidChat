@@ -6,16 +6,18 @@
 <body>
 	<h1>Video Chat Demo</h1>
 	<button id="connect_button">connect</button>
-	<div id="video_player">
-		<div><video id="my_video"></video></div>
-		<div><video id="friends_video"></video></div>
+	<div class="splitscreen">
+	    <video class="left" id="my_video"></video>
+		<video class="right" id="friends_video"></video>
 	</div>
+
+	
 	<script type="text/javascript" src="videochat.js"></script>
 	<script type="text/javascript">
 		vc = new VideoChat({
 			divID: "video_player",
-			height: "400",
-			width: "400",
+			height: "600",
+			width: "600",
 			number: 1
 		})
 	</script>

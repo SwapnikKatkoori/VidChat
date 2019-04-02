@@ -35,6 +35,8 @@ class VideoChat{
 			friends_video.autoplay = true
 			friends_video.height = this.height;
 			friends_video.width = this.width;
+			friends_video.style.transform = "scaleX(-1)";
+
 			console.log("here")
 
 		})
@@ -46,6 +48,7 @@ class VideoChat{
 		this.show_all = this.show_all.bind(this)
 		this.recieve_message = this.recieve_message.bind(this)
 		// this.handleConnection = this.handleConnection.bind(this)
+		this.stream = null
 		this.initial_setup()
 	}
 
@@ -53,18 +56,17 @@ class VideoChat{
 		let join_button = document.getElementById("connect_button");
 		join_button.onclick = this.show_all
 		this.getPermissionAndStream()
-		//this.show_all()
 	 }
 	//Asks the user for permissiton to use camera and audio
 	async getPermissionAndStream(){
 		let stream = null;
 		try{
 			let constraints = {
-				audio:false,
+				audio:true,
 				video:true
 			};
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
-			this.show_my_face(stream)			
+			this.show_my_face(stream)
 		}
 		catch(err){
 			console.log(err);
@@ -77,6 +79,7 @@ class VideoChat{
 		my_video.height = this.height;
 		my_video.width = this.width;
 		my_video.autoplay = true;
+		my_video.style.transform = "scaleX(-1)";
 		this.peer_connection.addStream(stream)
 	}
 	async show_all(){
