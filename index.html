@@ -2,24 +2,32 @@
 <html>
 <head>
 	<title>Video Chat Demo</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
 </head>
 <body>
 	<h1>Video Chat Demo</h1>
-	<button id="connect_button">connect</button>
+	<div><input type="text" name="room" id="chat_room_input"></div>
+	<button id="chat_room_submit">Enter Chat Room</button>
+	<button id="connect_button" disabled="true">connect</button>
 	<div class="splitscreen">
 	    <video class="left" id="my_video"></video>
 		<video class="right" id="friends_video"></video>
 	</div>
 
-	
 	<script type="text/javascript" src="videochat.js"></script>
 	<script type="text/javascript">
-		vc = new VideoChat({
-			divID: "video_player",
-			height: "600",
-			width: "600",
-			number: 1
-		})
+		let submit_button = document.getElementById("chat_room_submit")
+		submit_button.onclick = createVideoChat
+		function createVideoChat(){
+			submit_button.setAttribute("disabled", "true");
+			vc = new VideoChat({
+				divID: "video_player",
+				connect_button_Id: "connect_button",
+				height: "600",
+				width: "600",
+				chat_room: document.getElementById("chat_room_input").value
+			})
+		}
 	</script>
 </body>
 </html>

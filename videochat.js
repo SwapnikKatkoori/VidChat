@@ -1,4 +1,3 @@
-
 class VideoChat{
 	constructor(initial_obj){
 		//initial obj is an object that the client passes in.
@@ -10,17 +9,13 @@ class VideoChat{
 		this.width = initial_obj.width
 		//The number of potential people in the chat
 		this.number = initial_obj.number
-
-		//this.ws = new WebSocket("ws://localhost:8000");
-		this.ws = new WebSocket("wss://pumpkin-cake-47918.herokuapp.com/")
-		this.ws.onopen = (event) =>{
-			console.log("connected to websocket on the client side");
-		}
-		this.ws.onmessage = (mssg) =>{
-			this.recieve_message(mssg)
-		}
-		let config = {iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.l.mozilla.com:3478'}, {urls: 'stun:stun.l.samsungsmartcam.com:3478'}]}
+		this.room_name = initial_obj.chat_room;
+		this.got_stream = false;
+		this.socket = io.connect('https://pumpkin-cake-47918.herokuapp.com/');
+	
 		
+		let config = {iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.l.mozilla.com:3478'}, {urls: 'stun:stun.l.samsungsmartcam.com:3478'}]}
+		this.show_all = this.show_all.bind(this)
 		//This creates a peer connection for this instance of video chat
 		//Peer connection api 
 		this.peer_connection = new RTCPeerConnection(config);
@@ -36,27 +31,40 @@ class VideoChat{
 			friends_video.height = this.height;
 			friends_video.width = this.width;
 			friends_video.style.transform = "scaleX(-1)";
+		})
 
-			console.log("here")
+		this.join_button = document.getElementById(initial_obj.connect_button_Id);
+		this.join_button.onclick = this.show_all
+		this.send_message = this.send_message.bind(this)
+		
+		this.recieve_message = this.recieve_message.bind(this)
+		this.stream = null
 
+		//This signifies that there are two users in the chat room
+		this.socket.on('clients_in_room', (mssg)=>{
+			console.log("both clients in room")
+			const self = this
+			if (!self.got_stream){
+				self.getPermissionAndStream()
+			}
+		})
+
+		this.socket.on('recieve_message', (mssg)=>{
+			this.recieve_message(mssg)
+		})
+
+		this.socket.on('initial_message', (mssg)=>{
+			this.socket.emit('room_name', this.room_name)
+		})
+
+		this.socket.on('both_streams_available', (mssg)=>{
+			const self = this
+			self.join_button.removeAttribute('disabled');
 		})
 
 
-		this.personal_id = Math.floor(Math.random()*1000000000);
-
-		this.send_message = this.send_message.bind(this)
-		this.show_all = this.show_all.bind(this)
-		this.recieve_message = this.recieve_message.bind(this)
-		// this.handleConnection = this.handleConnection.bind(this)
-		this.stream = null
-		this.initial_setup()
 	}
 
-	initial_setup(){
-		let join_button = document.getElementById("connect_button");
-		join_button.onclick = this.show_all
-		this.getPermissionAndStream()
-	 }
 	//Asks the user for permissiton to use camera and audio
 	async getPermissionAndStream(){
 		let stream = null;
@@ -66,6 +74,7 @@ class VideoChat{
 				video:true
 			};
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
+			this.got_stream = true;
 			this.show_my_face(stream)
 		}
 		catch(err){
@@ -74,6 +83,7 @@ class VideoChat{
 	}
 
 	show_my_face(stream){
+		this.socket.emit("got_stream", "Got stream!")
 		let my_video = document.getElementById("my_video")
 		my_video.srcObject = stream
 		my_video.height = this.height;
@@ -84,10 +94,11 @@ class VideoChat{
 		this.peer_connection.addStream(stream)
 	}
 	async show_all(){
+		var self = this
 		try{
-			let offer = await this.peer_connection.createOffer();
-			await this.peer_connection.setLocalDescription(offer)
-			this.send_message()
+			let offer = await self.peer_connection.createOffer();
+			await self.peer_connection.setLocalDescription(offer)
+			self.send_message()
 		}
 		catch(err){
 			console.log("error in show_all(): ", err);
@@ -101,19 +112,17 @@ class VideoChat{
 		if (ice_candidate instanceof MouseEvent){
 			ice_candidate = null
 		}
-		var json_string = JSON.stringify({user_id:id, message: [description,ice_candidate]})
-		this.ws.send(json_string)
+		const message_to_send = {user_id:id, message: [description,ice_candidate]};
+		this.socket.emit("message", message_to_send)
 	}
 
-	async recieve_message(mssg){
-		let data = JSON.parse(mssg.data);
-		console.log(data)
+	async recieve_message(data){
 		let message = data.message
 		let description = message[0]
 		let description_type = description.type
 		let ice_candidate = message[1]
 		if (ice_candidate != null){
-			console.log("recieved ice candidate")
+			console.log("receved ice candidate")
 			this.peer_connection.addIceCandidate(new RTCIceCandidate(ice_candidate))
 		}
 		else{
