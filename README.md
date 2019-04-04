@@ -33,12 +33,12 @@ Demo link: https://swapnikkatkoori.github.io/VidChat/
 <script type="text/javascript">
   vc = new VideoChat({
           my_video_id: "my_video", //This is the video element's id for the user's video
-				  other_video_id: "friends_video", //This is the video element's id for the remote peer
-				  connect_button_Id: "connect_button", //The div id of the button that will actually make the connection
-				  height: "600", //The height of the video element
-				  width: "600",  //THe width of the video element
-				  chat_room: document.getElementById("chat_room_input").value //The chat room identification
-        })
+	  other_video_id: "friends_video", //This is the video element's id for the remote peer
+	  connect_button_Id: "connect_button", //The div id of the button that will actually make the connection
+	  height: "600", //The height of the video element
+	  width: "600",  //THe width of the video element
+	  chat_room: document.getElementById("chat_room_input").value //The chat room identification
+	})
 </script>
 ```
 
