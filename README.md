@@ -4,7 +4,7 @@ VidChat is a WebRTC Client that allows users a simple way to embed video chat fu
 Demo link: https://swapnikkatkoori.github.io/VidChat/
 
 
-How It Works:
+**How It Works:**
 1) Include a script tag for videochat.js
 
 ```
@@ -45,7 +45,7 @@ How It Works:
 
 All done! A one on one video chat should appear with the users in the "chat room".
 
-Disclaimer:
+**Disclaimer:**
 
 -I created this just for fun and to learn WebRTC. It has not been tested extensively and it is definetly a work in progress. With that being said, please feel free to use any of the code from this mini project to set up your own implementation of WebRTC and video chat.
 
