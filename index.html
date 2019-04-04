@@ -21,7 +21,8 @@
 		function createVideoChat(){
 			submit_button.setAttribute("disabled", "true");
 			vc = new VideoChat({
-				divID: "video_player",
+				my_video_id: "my_video",
+				other_video_id: "friends_video",
 				connect_button_Id: "connect_button",
 				height: "600",
 				width: "600",
