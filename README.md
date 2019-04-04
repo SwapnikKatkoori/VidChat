@@ -38,11 +38,15 @@ How It Works:
 </script>
 ```
   -The WebRTC peer-to-peer connection process starts immediately once the new instance of VideoChat is created, so it would be a good idea to make sure that the chat room identification is set before creating the VideoChat instance.
+  
   -For the chat room identification in the demo, I just created an input field with a button, and called a function to create a new instance of VideoChat when the button was pressed. See the index.html for more details.
+  
   -A better way to get the chat room identification might be to have the user input it in another page and implement a simple backend to retrieve it when you create the chat. 
 
 All done! A one on one video chat should appear with the users in the "chat room".
 
 Disclaimer:
+
 -I created this just for fun and to learn WebRTC. It has not been tested extensively and it is definetly a work in progress. With that being said, please feel free to use any of the code from this mini project to set up your own implementation of WebRTC and video chat.
+
 -The RTCPeerConnection method addStream(), which I use in this, has been deprecated and while it works currently, browsers may not support at some point. This is the link to see what browsers support it: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream.
