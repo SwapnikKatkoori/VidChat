@@ -10,4 +10,16 @@ How It Works:
 ```
 <script type="text/javascript" src="videochat.js"></script>
 ```
+2) To actually include the video chat, create a new instance of it like so:
+```
+<script type="text/javascript">
+  vc = new VideoChat({
+          divID: "video_player",  //This is the 
+          connect_button_Id: "connect_button",
+          height: "600",
+          width: "600",
+          chat_room: document.getElementById("chat_room_input").value
+        })
+</script>
+```
 More updates coming soon!
